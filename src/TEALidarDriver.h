@@ -1,5 +1,5 @@
-#ifndef TIALIDAR_DRIVER_H
-#define TIALIDAR_DRIVER_H
+#ifndef TEALIDAR_DRIVER_H
+#define TEALIDAR_DRIVER_H
 #include <stdlib.h>
 #include <core/common/DriverInterface.h>
 #include <core/network/PassiveSocket.h>
@@ -12,7 +12,7 @@ using namespace core::common;
 using namespace core::network;
 
 
-class TIALidarDriver : public DriverInterface {
+class TEALidarDriver : public DriverInterface {
 
 private:
     string m_ip;
@@ -24,21 +24,21 @@ private:
     CPassiveSocket *m_socket_list;
     Locker m_ListLock;
     Thread m_ListThread;
-    vector<TIALidarListInfo> m_lidarList;
-    TIALidarConfig m_lidarConfig;
+    vector<NetLidarListInfo> m_lidarList;
+    NetLidarConfig m_lidarConfig;
 
 public:
     /**
      * @par Constructor
      *
      */
-    TIALidarDriver();
+    TEALidarDriver();
 
     /**
      * @par Destructor
      *
      */
-    ~TIALidarDriver();
+    ~TEALidarDriver();
 
 /*--------------------------------------------------------------------------------------------------------------
                                                      本类的私有函数
@@ -326,6 +326,6 @@ public:
     virtual map<string, string> lidarPortList(); 
 };
 
-}// namespace ydlidar
+} // namespace ydlidar
 
-#endif// TIALIDAR_DRIVER_H
+#endif //TEALIDAR_DRIVER_H

@@ -43,26 +43,34 @@
 /**
  * @brief UDP Data format
  */
-#define DATABLOCK_COUNT (12)
-#define DATA_COUNT (16)
-struct TIADataBlock {
-    uint16_t frameHead;
-    uint16_t startAngle;
-    uint32_t data[DATA_COUNT];
-}__attribute__((packed));
-
-struct TIADataFrame {
-    TIADataBlock dataBlock[DATABLOCK_COUNT];
-    uint32_t timeStamp;
-    uint32_t factory;
-}__attribute__((packed));
+#define DATABLOCK_COUNT 12
+#define DATA_COUNT 16
+#define DATA_ONESIZE 500 //固定大小的数据（因串口转网口模组限制，每包数据最大500字节）
+#define TEA_HEADSIZE 2 //头部标识2字节
+#define TEA_TAILSIZE 3 //尾部标识3字节
+#define TEA_MAXSIZE (TEA_HEADSIZE + TEA_TAILSIZE)
+//小包数据（包含16个点）
+struct NetDataBlock {
+    uint16_t frameHead = 0xEEFF;
+    uint16_t startAngle = 0;
+    uint32_t data[DATA_COUNT] = {0};
+} __attribute__((packed));
+#define NETDATABLOCKSIXE sizeof(NetDataBlock)
+//大包数据（包含12 * 小包数据）
+struct NetDataFrame {
+    NetDataBlock dataBlock[DATABLOCK_COUNT];
+    uint32_t timeStamp = 0;
+    uint32_t factory = 0x21436500;
+} __attribute__((packed));
+#define NETDATAFRAMESIXE sizeof(NetDataFrame)
+#define NETDATAFRAMESIXE2 (NETDATAFRAMESIXE - TEA_TAILSIZE)
 
 #if defined(_WIN32)
 #pragma pack()
 #endif
 
 ///JSON命令
-typedef struct _TIALidarConfig {
+typedef struct _NetLidarConfig {
     int samplerate;
     int motorSpeed;
     int angleCompensation;
@@ -75,10 +83,10 @@ typedef struct _TIALidarConfig {
     int heartbeat;
     int scanType;
     int restart;
-} TIALidarConfig;
+} NetLidarConfig;
 
 ///获取在线雷达
-struct TIALidarListInfo {
+struct NetLidarListInfo {
     /*! Address of the serial port (this can be passed to the constructor of Serial). */
     std::string ip;
     /*! Human readable description of serial device if available. */

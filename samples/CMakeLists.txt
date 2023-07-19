@@ -18,7 +18,7 @@ foreach(child ${APP_LIST})
   string(REPLACE "${curdir}/" "" app_main ${child})
   string(REPLACE ".cpp" "" APP_NAME ${app_main})
   ADD_EXECUTABLE(${APP_NAME} ${app_main})
-  TARGET_LINK_LIBRARIES(${APP_NAME} TIA_SDK)
+  TARGET_LINK_LIBRARIES(${APP_NAME} TEA_SDK)
 
   INSTALL(TARGETS ${APP_NAME}
     RUNTIME DESTINATION bin
@@ -30,7 +30,7 @@ foreach(child ${C_APP_LIST})
   string(REPLACE "${curdir}/" "" app_main ${child})
   string(REPLACE ".c" "" APP_NAME ${app_main})
   ADD_EXECUTABLE(${APP_NAME} ${app_main})
-  TARGET_LINK_LIBRARIES(${APP_NAME} TIA_SDK)
+  TARGET_LINK_LIBRARIES(${APP_NAME} TEA_SDK)
   target_link_libraries(${APP_NAME} -lstdc++ -lm)
   INSTALL(TARGETS ${APP_NAME}
     RUNTIME DESTINATION bin

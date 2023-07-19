@@ -10,7 +10,7 @@
 #include <string.h>
 #include "ydlidar_sdk.h"
 #if defined(_MSC_VER)
-#pragma comment(lib, "TIA_SDK.lib")
+#pragma comment(lib, "TEA_SDK.lib")
 #endif
 
 

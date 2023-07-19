@@ -1,4 +1,4 @@
-#include "TIALidarDriver.h"
+#include "TEALidarDriver.h"
 #include <core/serial/common.h>
 #include <math.h>
 #include <core/tools/cJSON.h>
@@ -8,7 +8,8 @@
 
 namespace ydlidar {
 
-TIALidarDriver::TIALidarDriver() {
+TEALidarDriver::TEALidarDriver() 
+{
     m_ip = "192.168.0.11";
     m_cmd_port = 8090;
     m_data_port = 8000;
@@ -24,8 +25,7 @@ TIALidarDriver::TIALidarDriver() {
     m_ScanNodeBuf = new node_info[MAX_SCAN_NODES];
 }
 
-
-TIALidarDriver::~TIALidarDriver() {
+TEALidarDriver::~TEALidarDriver() {
     disconnect();
     ScopedLocker data_lock(m_DataLock);
     if (m_socket_data) {
@@ -52,7 +52,7 @@ TIALidarDriver::~TIALidarDriver() {
                                                      本类的私有函数
 ---------------------------------------------------------------------------------------------------------------*/
 
-bool TIALidarDriver::configPortConnect(const char *lidarIP, int tcpPort, uint32_t timeout) {
+bool TEALidarDriver::configPortConnect(const char *lidarIP, int tcpPort, uint32_t timeout) {
     ScopedLocker lock(m_CmdLock);
     if (!m_socket_cmd) {
         return false;
@@ -78,7 +78,7 @@ bool TIALidarDriver::configPortConnect(const char *lidarIP, int tcpPort, uint32_
 }
 
 
-bool TIALidarDriver::configPortDisconnect() {
+bool TEALidarDriver::configPortDisconnect() {
     ScopedLocker lock(m_CmdLock);
     if (!m_socket_cmd) {
             return false;
@@ -87,7 +87,7 @@ bool TIALidarDriver::configPortDisconnect() {
 }
 
 
-bool TIALidarDriver::configPortTransfer(char *transBuf, int transLen, char *recvBuf, int recvMaxSize) {
+bool TEALidarDriver::configPortTransfer(char *transBuf, int transLen, char *recvBuf, int recvMaxSize) {
     ScopedLocker lock(m_CmdLock);
     int len = 0;
     if (!m_socket_cmd){
@@ -108,7 +108,7 @@ bool TIALidarDriver::configPortTransfer(char *transBuf, int transLen, char *recv
 }
 
 
-result_t TIALidarDriver::configMessage(char op, const char *descriptor, int &value, uint32_t timeout) {
+result_t TEALidarDriver::configMessage(char op, const char *descriptor, int &value, uint32_t timeout) {
     char name[64] = {0};
     char transbuf[256] = {0};
     char recvbuf[256] = {0};
@@ -152,7 +152,7 @@ result_t TIALidarDriver::configMessage(char op, const char *descriptor, int &val
 }
 
 
-result_t TIALidarDriver::startMeasure(uint32_t timeout) {
+result_t TEALidarDriver::startMeasure(uint32_t timeout) {
     m_lidarConfig.scanType = 0;
     if(!IS_OK(configMessage('w', valName(m_lidarConfig.scanType), m_lidarConfig.scanType))) {
         return RESULT_FAIL;
@@ -161,7 +161,7 @@ result_t TIALidarDriver::startMeasure(uint32_t timeout) {
 }
 
 
-result_t TIALidarDriver::stopMeasure(uint32_t timeout) {
+result_t TEALidarDriver::stopMeasure(uint32_t timeout) {
     m_lidarConfig.scanType = -1;
     if(!IS_OK(configMessage('w', valName(m_lidarConfig.scanType), m_lidarConfig.scanType))) {
         return RESULT_FAIL;
@@ -169,8 +169,7 @@ result_t TIALidarDriver::stopMeasure(uint32_t timeout) {
     return RESULT_OK;
 }
 
-
-bool TIALidarDriver::dataPortConnect(const char *lidarIP, int localPort) {
+bool TEALidarDriver::dataPortConnect(const char *lidarIP, int localPort) {
     ScopedLocker lock(m_DataLock);
 
     if (!m_socket_data) {
@@ -178,7 +177,7 @@ bool TIALidarDriver::dataPortConnect(const char *lidarIP, int localPort) {
     }
     if (!m_socket_data->IsSocketValid()) {
         if (m_socket_data->Initialize()) {
-            if (!m_socket_data->Listen(NULL, localPort)) {
+            if (!m_socket_data->Listen(lidarIP, localPort)) {
                 m_socket_data->Close();
                 return false;
             }
@@ -188,8 +187,7 @@ bool TIALidarDriver::dataPortConnect(const char *lidarIP, int localPort) {
     return m_socket_data->IsSocketValid();
 }
 
-
-bool TIALidarDriver::dataPortDisconnect() {
+bool TEALidarDriver::dataPortDisconnect() {
     ScopedLocker lock(m_DataLock);
 
     if (!m_socket_data) {
@@ -200,14 +198,14 @@ bool TIALidarDriver::dataPortDisconnect() {
 }
 
 
-void TIALidarDriver::disableDataGrabbing() {
+void TEALidarDriver::disableDataGrabbing() {
     ScopedLocker l(m_Lock);
     m_DataEvent.set();
     m_Thread.join();
 }
 
 
-bool TIALidarDriver::listPortConnect(const char *lidarIP, int localPort) {
+bool TEALidarDriver::listPortConnect(const char *lidarIP, int localPort) {
     ScopedLocker lock(m_ListLock);
 
     if (!m_socket_list) {
@@ -231,7 +229,7 @@ bool TIALidarDriver::listPortConnect(const char *lidarIP, int localPort) {
 }
 
 
-bool TIALidarDriver::listPortDisconnect() {
+bool TEALidarDriver::listPortDisconnect() {
     ScopedLocker lock(m_ListLock);
     if (!m_socket_list) {
         return false;
@@ -241,7 +239,7 @@ bool TIALidarDriver::listPortDisconnect() {
 }
 
 
-result_t TIALidarDriver::checkAutoConnecting() {
+result_t TEALidarDriver::checkAutoConnecting() {
     int retryConnect = 0;
     setIsAutoconnting(true);
     while(getIsAutoReconnect()) {
@@ -262,88 +260,186 @@ result_t TIALidarDriver::checkAutoConnecting() {
     return RESULT_OK;
 }
 
-
-int32_t TIALidarDriver::receiveData(uint8_t *buf, uint32_t len) {
+int32_t TEALidarDriver::receiveData(uint8_t *buf, uint32_t len) 
+{
     /* wait data from socket. */
     ScopedLocker lock(m_DataLock);
     if (!m_socket_data) {
             return -1;
     }
-    return m_socket_data->Receive(len, buf);
+    int32_t l = m_socket_data->Receive(len, buf);
+    // LOGD("UDP RECV(%d): ", l);
+    // for (int32_t i=0; i<l; ++i)
+    //     printf("%02X", buf[i]);
+    // printf("\n");
+    return l;
 }
 
-
-
-result_t TIALidarDriver::waitScanData(node_info *nodebuffer, size_t &count, uint32_t timeout) {
-
-    TIADataFrame frame; 
+//解析大包数据（没有校验和，没有定义数据大小）
+result_t TEALidarDriver::waitScanData(
+    node_info *nodebuffer, 
+    size_t &count, 
+    uint32_t timeout) 
+{
+    result_t ret = RESULT_FAIL;
+    NetDataFrame frame; //大包数据（包含12 * 小包数据16个点）
+    uint8_t* p = reinterpret_cast<uint8_t*>(&frame);
     node_info *n = NULL;
     static uint16_t lastPointAngle = 0;
     static uint8_t lastNum = 0xff;
     count = 0;
 
-    // if (!getIsConnected()) {
-    //     LOGW("lidar not connected");
-    //     return RESULT_FAIL;
-    // }
+    // uint8_t buff[DATA_ONESIZE] = {0};
+    // receiveData(buff, DATA_ONESIZE);
+    // return RESULT_OK;
 
-    int len = receiveData((uint8_t*)&frame, sizeof(frame));
-    if(len < 0){
-        return RESULT_TIMEOUT;
-    }
-    else if(len < sizeof(frame)){
-        return RESULT_FAIL;
-    }
+    static uint8_t s_data[DATA_ONESIZE] = {0};
+    static int s_dataSize = 0;
+    int nl = 0;
+    int rl = 0; //实际接收数据长度
+    int pos = 0;
+    uint32_t st = getms(); //开始时间
+    uint32_t rt = 0; //当前时间差
+    while ((rt = getms() - st) < timeout)
+    {
+        //每次读取固定大小的数据
+        uint8_t data[DATA_ONESIZE] = {0};
+        if (s_dataSize) // 将上次剩余的数据加进来
+        {
+            memcpy(data, s_data, s_dataSize);
+            rl = s_dataSize;
+            s_dataSize = 0;
+        }
+        else //新读取数据
+        {
+            rl = receiveData(data, DATA_ONESIZE);
+            if (rl < 0)
+            {
+                LOGE("Recv data timeout");
+                return RESULT_TIMEOUT;
+            }
+        }
+        //遍历数据查找包结束标识0x214365
+        for (size_t i = 0; i < rl; ++i)
+        {
+            uint8_t c = data[i];
+            switch (pos)
+            {
+            case 0:
+                if (c != 0x65)
+                {
+                    pos = 0;
+                    continue;
+                }
+                break;
+            case 1:
+                if (c != 0x43)
+                {
+                    pos = 0;
+                    continue;
+                }
+                break;
+            case 2:
+                if (c != 0x21)
+                {
+                    pos = 0;
+                    continue;
+                }
+                break;
+            }
+            pos ++;
 
-    for(int i = 0; i < DATABLOCK_COUNT; i++) {
-        if (BigLittleSwap16(frame.dataBlock[i].frameHead) != 0xFFEE) {
-            LOGE("data error, frameHead[%d] != 0xFFEE", i);
-            return RESULT_FAIL;
+            if (pos == TEA_TAILSIZE)
+            {
+                pos = 0;
+                i ++;
+                //找到上一包结束标记以后获取整大包数据
+                // LOGD("Start pos %llu", i);
+                int rs = rl - i; // 数据实际大小
+                int ss = 0;
+                memcpy(p, data + i, rs); //截取当前UDP包中的剩余数据
+                //继续获取UDP数据以补全一整大包数据
+                while (rs < NETDATAFRAMESIXE2)
+                {
+                    rl = receiveData(data, DATA_ONESIZE);
+                    if (rl < 0 || (rt = getms() - st) > timeout)
+                    {
+                        LOGE("Recv data timeout");
+                        return RESULT_TIMEOUT;
+                    }
+                    ss = NETDATAFRAMESIXE2 - rs > DATA_ONESIZE ? DATA_ONESIZE :
+                        NETDATAFRAMESIXE2 - rs;
+                    memcpy(p + rs, data, ss);
+                    rs += rl;
+                    // if (rs >= NETDATAFRAMESIXE2)
+                    //     LOGD("End pos %d %d", ss, DATA_ONESIZE * 2 - ss);
+                    ss = DATA_ONESIZE - ss;
+                }
+                //将多余部分暂存在静态缓存中，等待下一次使用
+                if (ss)
+                {
+                    memcpy(s_data, data + (DATA_ONESIZE - ss), ss);
+                    s_dataSize += ss;
+                }
+                ret = RESULT_OK;
+                break;
+            }
+        }
+
+        if (IS_OK(ret))
+        {
+            break;
         }
     }
 
-    // if((BigLittleSwap32(frame.factory) & 0xFFF0FFFF) != 0x21300000) {
-    //     LOGE("(data error, factory & 0xFFF0FFFF) != 0x21300000");
-    //     return RESULT_FAIL;
+    //判断每小包数据的头部是否有效
+    // for (int i = 0; i < DATABLOCK_COUNT; i++) 
+    // {
+    //     if (BigLittleSwap16(frame.dataBlock[i].frameHead) != 0xFFEE) {
+    //         LOGE("data error, frameHead[%d] != 0xFFEE", i);
+    //         return RESULT_FAIL;
+    //     }
     // }
-    // if((BigLittleSwap32(frame.factory) & 0xF0FFFFFF) != 0x00123456) {
-    //     LOGE("(data error, factory & 0xF0FFFFFF) != 0x00123456");
-    //     return RESULT_FAIL;
-    // }
-
 
     //uint8_t curNum = (BigLittleSwap32(frame.factory) & 0x000F0000) >> 16;
     uint8_t curNum = (BigLittleSwap32(frame.factory) & 0x0F000000) >> 24;
-
-    if((curNum - lastNum != 1) && (curNum - lastNum != -15)) {
+    if ((curNum - lastNum != 1) && 
+        (curNum - lastNum != -15) && 
+        lastNum != 0xff) 
+    {
         LOGE("data packet dropout, curNum = %d, lastNum = %d", curNum, lastNum);
         lastNum = curNum;
         return RESULT_FAIL;
     }
     lastNum = curNum;
     
-    for(int i = 0; i < DATABLOCK_COUNT; i++) {
+    for (int i = 0; i < DATABLOCK_COUNT; i++) 
+    {
+        if (BigLittleSwap16(frame.dataBlock[i].frameHead) != 0xFFEE)
+            continue;
+
         uint16_t startAngle = BigLittleSwap16(frame.dataBlock[i].startAngle);
         uint16_t addAngle = 0;
-        for(int j = 0; j < DATA_COUNT; j++) {
+        for (int j = 0; j < DATA_COUNT; j++) 
+        {
             uint32_t data = BigLittleSwap32(frame.dataBlock[i].data[j]);
-            if(data != 0) {
+            if (data != 0) {
                 n = nodebuffer + count;
                 addAngle += ((data & 0x3f000000) >> 24);
                 n->angle_q6_checkbit = startAngle + addAngle;
-                n->sync_flag = (n->angle_q6_checkbit < lastPointAngle) ? Node_Sync : Node_NotSync;//当前点的角度小于上一个点的角度，则认为当前点为零位点
+                n->sync_flag = (n->angle_q6_checkbit < lastPointAngle) ? Node_Sync : Node_NotSync; //当前点的角度小于上一个点的角度，则认为当前点为零位点
                 n->sync_quality = (data & 0xff0000) >> 16;
                 n->distance_q2 = (data & 0xffff) >> 0;
                 //n->stamp = timeStamp;
                 lastPointAngle = n->angle_q6_checkbit;
-                count++;
-            }else {
+                count ++;
+            } else {
                 break;
-                i = DATABLOCK_COUNT;
             }
         }
     }
 
+    //处理时间戳
     static uint64_t TimeStampCount = 0;
     static uint64_t TimeStamp = 0;
     static uint64_t lastTimeStamp = 0;
@@ -351,7 +447,8 @@ result_t TIALidarDriver::waitScanData(node_info *nodebuffer, size_t &count, uint
     static uint32_t lastTimeStampTmp = 0;
 
     TimeStampTmp = BigLittleSwap32(frame.timeStamp);
-    TimeStampCount = TimeStampTmp > lastTimeStampTmp ? TimeStampCount : TimeStampCount + 1;//当前时间戳比上一轮时间戳小，说明时间戳溢出重新计数
+    TimeStampCount = TimeStampTmp > lastTimeStampTmp ? 
+        TimeStampCount : TimeStampCount + 1; //当前时间戳比上一轮时间戳小，说明时间戳溢出重新计数
     TimeStamp = 0xffffffff * TimeStampCount + TimeStampTmp;
     lastTimeStampTmp = TimeStampTmp;
 
@@ -364,9 +461,9 @@ result_t TIALidarDriver::waitScanData(node_info *nodebuffer, size_t &count, uint
     return RESULT_OK;
 }
 
-
-result_t TIALidarDriver::cacheScanData() {
-    LOGD("Thread Start:  [%s]", __func__);
+result_t TEALidarDriver::cacheScanData() 
+{
+    LOGD("Thread Start: [%s]", __func__);
     node_info      local_buf[DATABLOCK_COUNT * DATA_COUNT];
     node_info      local_scan[MAX_SCAN_NODES];
     size_t         timeout_count = 0;
@@ -376,37 +473,40 @@ result_t TIALidarDriver::cacheScanData() {
 
     memset(&local_buf, 0, sizeof(local_buf));
     memset(&local_scan, 0, sizeof(local_scan));
-    while (!IS_OK(waitScanData(local_buf, count)));//丢弃一包
 
-    while (getIsScanning()) {
+    // while (!IS_OK(waitScanData(local_buf, count)));//丢弃一包
+
+    while (getIsScanning()) 
+    {
         count = 0;
         memset(local_buf, 0, sizeof(local_buf));
         ans = waitScanData(local_buf, count);
-        if(IS_FAIL(ans)){
+        if (IS_FAIL(ans)) {
             LOGE("bad data block!!!");
-            waitScanData(local_buf, count);//丢弃一包
+            // waitScanData(local_buf, count);//丢弃一包
             local_scan[0].sync_flag = Node_Sync;    
             continue;
-        }else if(IS_TIMEOUT(ans)){
+        } else if (IS_TIMEOUT(ans)) {
             timeout_count++;
             LOGE("get data timeout(%d)!!!", timeout_count);
             if(timeout_count > DEFAULT_TIMEOUT_COUNT){
                 setDriverError(TimeoutError);
-                if(IS_OK(checkAutoConnecting())) {
-                    waitScanData(local_buf, count);//丢弃一包
+                if (IS_OK(checkAutoConnecting())) {
+                    // waitScanData(local_buf, count);//丢弃一包
                     local_scan[0].sync_flag = Node_Sync;  
                     timeout_count = 0;
-                }else {
+                } else {
                     LOGE("exit scanning thread!!!");
                     return RESULT_FAIL;
                 }
             }
             continue;
-        }else{
+        } else {
             timeout_count = 0;
         }
 
-        for (size_t pos = 0; pos < count; pos++) {
+        for (size_t pos = 0; pos < count; pos++) 
+        {
             if (local_buf[pos].sync_flag & Node_Sync) {
                 if ((local_scan[0].sync_flag & Node_Sync)) {
                     m_Lock.lock();//timeout lock, wait resource copy
@@ -426,17 +526,16 @@ result_t TIALidarDriver::cacheScanData() {
     return RESULT_OK;
 }
 
-
-result_t TIALidarDriver::createThread() {
-    m_Thread = CLASS_THREAD(TIALidarDriver, cacheScanData);
+result_t TEALidarDriver::createThread() 
+{
+    m_Thread = CLASS_THREAD(TEALidarDriver, cacheScanData);
     if (m_Thread.getHandle() == 0) {
         return RESULT_FAIL;
     }
     return RESULT_OK;
 }
 
-
-result_t TIALidarDriver::GetListInfo() {
+result_t TEALidarDriver::GetListInfo() {
     LOGD("Thread Start:  [%s]", __func__);
     char name[64] = {0};
     char buf[256] = {0};
@@ -449,7 +548,7 @@ result_t TIALidarDriver::GetListInfo() {
         memset(buf, 0, sizeof(buf));
 
         if(m_socket_list->Receive(sizeof(buf), (uint8_t*)buf) > 0) {
-            TIALidarListInfo lst;
+            NetLidarListInfo lst;
             cJSON *item = NULL;
             cJSON *root = cJSON_Parse(buf);
             if (!root){
@@ -492,8 +591,8 @@ result_t TIALidarDriver::GetListInfo() {
 }
 
 
-result_t TIALidarDriver::createGetListThread() {
-    m_ListThread = CLASS_THREAD(TIALidarDriver, GetListInfo);
+result_t TEALidarDriver::createGetListThread() {
+    m_ListThread = CLASS_THREAD(TEALidarDriver, GetListInfo);
     if (m_ListThread.getHandle() == 0) {
         return RESULT_FAIL;
     }
@@ -508,7 +607,7 @@ result_t TIALidarDriver::createGetListThread() {
                                         从DriverInterface虚基类继承的纯虚函数
 ---------------------------------------------------------------------------------------------------------------*/
 
-result_t TIALidarDriver::connect(const char *port_path, uint32_t baudrate) {
+result_t TEALidarDriver::connect(const char *port_path, uint32_t baudrate) {
     m_ip = port_path;
     m_cmd_port = baudrate;
 
@@ -535,7 +634,7 @@ result_t TIALidarDriver::connect(const char *port_path, uint32_t baudrate) {
 }
 
 
-void TIALidarDriver::disconnect() {
+void TEALidarDriver::disconnect() {
     configPortDisconnect();
     dataPortDisconnect();
     listPortDisconnect();
@@ -544,7 +643,7 @@ void TIALidarDriver::disconnect() {
 }
 
 
-result_t TIALidarDriver::grabScanData(node_info *nodebuffer, size_t &count, uint32_t timeout) {
+result_t TEALidarDriver::grabScanData(node_info *nodebuffer, size_t &count, uint32_t timeout) {
     switch (m_DataEvent.wait(timeout)) {
 
         case Event::EVENT_TIMEOUT: {
@@ -572,7 +671,7 @@ result_t TIALidarDriver::grabScanData(node_info *nodebuffer, size_t &count, uint
 }
 
 
-result_t TIALidarDriver::startScan(uint32_t timeout) {
+result_t TEALidarDriver::startScan(uint32_t timeout) {
     if(getIsScanning()){
         LOGD("The lidar is scanning");
         return RESULT_OK;
@@ -592,7 +691,7 @@ result_t TIALidarDriver::startScan(uint32_t timeout) {
 }
 
 
-result_t TIALidarDriver::stopScan(uint32_t timeout) {
+result_t TEALidarDriver::stopScan(uint32_t timeout) {
     if(!getIsScanning()){
         LOGD("The lidar is not scanning");
         return RESULT_OK;
@@ -613,7 +712,7 @@ result_t TIALidarDriver::stopScan(uint32_t timeout) {
 }
 
 
-result_t TIALidarDriver::getScanFrequency(scan_frequency &frequency, uint32_t timeout) {
+result_t TEALidarDriver::getScanFrequency(scan_frequency &frequency, uint32_t timeout) {
     if(!IS_OK(configMessage('r', valName(m_lidarConfig.motorSpeed), m_lidarConfig.motorSpeed))) {
         return RESULT_FAIL;
     }
@@ -622,7 +721,7 @@ result_t TIALidarDriver::getScanFrequency(scan_frequency &frequency, uint32_t ti
 }
 
 
-result_t TIALidarDriver::setScanFrequency(scan_frequency &frequency, uint32_t timeout) {
+result_t TEALidarDriver::setScanFrequency(scan_frequency &frequency, uint32_t timeout) {
     m_lidarConfig.motorSpeed = frequency.frequency;
     if(!IS_OK(configMessage('w', valName(m_lidarConfig.motorSpeed), m_lidarConfig.motorSpeed))) {
         return RESULT_FAIL;
@@ -631,7 +730,7 @@ result_t TIALidarDriver::setScanFrequency(scan_frequency &frequency, uint32_t ti
 }
 
 
-result_t TIALidarDriver::setScanFrequencyAdd(scan_frequency &frequency, uint32_t timeout) {
+result_t TEALidarDriver::setScanFrequencyAdd(scan_frequency &frequency, uint32_t timeout) {
     if(!IS_OK(getScanFrequency(frequency))) {
         return RESULT_FAIL;
     }
@@ -640,7 +739,7 @@ result_t TIALidarDriver::setScanFrequencyAdd(scan_frequency &frequency, uint32_t
 }
 
 
-result_t TIALidarDriver::setScanFrequencyDis(scan_frequency &frequency, uint32_t timeout) {
+result_t TEALidarDriver::setScanFrequencyDis(scan_frequency &frequency, uint32_t timeout) {
     if(!IS_OK(getScanFrequency(frequency))) {
         return RESULT_FAIL;
     }
@@ -649,7 +748,7 @@ result_t TIALidarDriver::setScanFrequencyDis(scan_frequency &frequency, uint32_t
 }
 
 
-result_t TIALidarDriver::setScanFrequencyAddMic(scan_frequency &frequency, uint32_t timeout) {
+result_t TEALidarDriver::setScanFrequencyAddMic(scan_frequency &frequency, uint32_t timeout) {
     if(!IS_OK(getScanFrequency(frequency))) {
         return RESULT_FAIL;
     }
@@ -658,7 +757,7 @@ result_t TIALidarDriver::setScanFrequencyAddMic(scan_frequency &frequency, uint3
 }
 
 
-result_t TIALidarDriver::setScanFrequencyDisMic(scan_frequency &frequency, uint32_t timeout) {
+result_t TEALidarDriver::setScanFrequencyDisMic(scan_frequency &frequency, uint32_t timeout) {
     if(!IS_OK(getScanFrequency(frequency))) {
         return RESULT_FAIL;
     }
@@ -667,7 +766,7 @@ result_t TIALidarDriver::setScanFrequencyDisMic(scan_frequency &frequency, uint3
 }
 
 
-result_t TIALidarDriver::getSamplingRate(sampling_rate &rate, uint32_t timeout) {
+result_t TEALidarDriver::getSamplingRate(sampling_rate &rate, uint32_t timeout) {
     if(!IS_OK(configMessage('r', valName(m_lidarConfig.samplerate), m_lidarConfig.samplerate))) {
         return RESULT_FAIL;
     }
@@ -676,7 +775,7 @@ result_t TIALidarDriver::getSamplingRate(sampling_rate &rate, uint32_t timeout) 
 }
 
 
-result_t TIALidarDriver::setSamplingRate(sampling_rate &rate, uint32_t timeout) {
+result_t TEALidarDriver::setSamplingRate(sampling_rate &rate, uint32_t timeout) {
     m_lidarConfig.samplerate = rate.rate;
     if(!IS_OK(configMessage('w', valName(m_lidarConfig.samplerate), m_lidarConfig.samplerate))) {
         return RESULT_FAIL;
@@ -685,7 +784,7 @@ result_t TIALidarDriver::setSamplingRate(sampling_rate &rate, uint32_t timeout) 
 }
 
 
-const char* TIALidarDriver::DescribeError(bool isTCP) {
+const char* TEALidarDriver::DescribeError(bool isTCP) {
     if (isTCP) {
         ScopedLocker lock(m_CmdLock);
         return m_socket_cmd != NULL ? m_socket_cmd->DescribeError() : "NO Socket";
@@ -696,11 +795,11 @@ const char* TIALidarDriver::DescribeError(bool isTCP) {
 }
 
 
-map<string, string> TIALidarDriver::lidarPortList() {
-    vector<TIALidarListInfo> lst = m_lidarList;
+map<string, string> TEALidarDriver::lidarPortList() {
+    vector<NetLidarListInfo> lst = m_lidarList;
     map<string, string> ports;
 
-    for (vector<TIALidarListInfo>::iterator it = lst.begin(); it != lst.end(); it++) {
+    for (vector<NetLidarListInfo>::iterator it = lst.begin(); it != lst.end(); it++) {
         string port = "ydlidar" + (*it).ip;
         ports[port] = (*it).model;
     }
