@@ -15,7 +15,8 @@ namespace common {
 class DriverInterface {
 public:
     enum YDLIDAR_MODLES {
-        YDLIDAR_TIA     = 300,/**< TIA LiDAR Model. */
+        YDLIDAR_TIA     = 300, /**< TIA LiDAR Model. */
+        YDLIDAR_TEA     = 301, /**< TEA LiDAR Model. */
         YDLIDAR_Tail,
     };
 

@@ -32,7 +32,7 @@
 #include "core/common/DriverInterface.h"
 #include "core/common/ydlidar_help.h"
 #include "core/common/ydlidar_def.h"
-#include "TIALidarDriver.h"
+#include "TEALidarDriver.h"
 #include <core/serial/serial.h>
 
 /*-------------------------------------------------------------
@@ -42,7 +42,7 @@ CYdLidar::CYdLidar() {
     m_lidarPtr = nullptr;
     m_global_nodes = new node_info[DriverInterface::MAX_SCAN_NODES];
     m_field_of_view = 300;
-    m_lidar_model = DriverInterface::YDLIDAR_TIA;
+    m_lidar_model = DriverInterface::YDLIDAR_TEA;
 
     //参数表
     m_SerialPort = "192.168.0.11";
@@ -268,10 +268,11 @@ bool CYdLidar::initialize() {
 /*-------------------------------------------------------------
                           checkCOMMs
 -------------------------------------------------------------*/
-bool CYdLidar::checkCOMMs() {
+bool CYdLidar::checkCOMMs() 
+{
     if (!m_lidarPtr) {
-        if (isTIALidar(m_LidarType)) {
-            m_lidarPtr = new ydlidar::TIALidarDriver();
+        if (isTEALidar(m_LidarType)) {
+            m_lidarPtr = new ydlidar::TEALidarDriver();
         } else {
             LOGW("An unsupported model:%d", m_LidarType);
         }

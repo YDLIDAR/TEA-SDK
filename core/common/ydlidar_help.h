@@ -65,18 +65,20 @@ namespace common {
  * @param model lidar model
  * @return lidar model name
  */
-inline std::string lidarModelToString(int model) {
+inline std::string lidarModelToString(int model)
+{
     std::string name = "unkown";
-    switch (model) {
-        case DriverInterface::YDLIDAR_TIA:
-        name = "TIA";
+    switch (model)
+    {
+    case DriverInterface::YDLIDAR_TEA:
+        name = "TEA";
         break;
 
-        default:
+    default:
         name = "unkown(YD-" + std::to_string(model) + ")";
         break;
-  }
-  return name;
+    }
+    return name;
 }
 
 /*!
@@ -87,7 +89,7 @@ inline std::string lidarModelToString(int model) {
 inline std::vector<int> getDefaultSampleRate(int model) {
     std::vector<int> srs;
     switch (model) {
-        case DriverInterface::YDLIDAR_TIA:
+        case DriverInterface::YDLIDAR_TEA:
         srs.push_back(20);
         break;
 
@@ -105,7 +107,7 @@ inline std::vector<int> getDefaultSampleRate(int model) {
  */
 inline bool hasSampleRate(int model) {
     bool ret = false;
-    if (model == DriverInterface::YDLIDAR_TIA) {
+    if (model == DriverInterface::YDLIDAR_TEA) {
         ret = true;
     }
     return ret;
@@ -119,7 +121,7 @@ inline bool hasSampleRate(int model) {
 
 inline bool hasZeroAngle(int model) {
     bool ret = false;
-    if (model == DriverInterface::YDLIDAR_TIA) {
+    if (model == DriverInterface::YDLIDAR_TEA) {
         ret = true;
     }
     return ret;
@@ -132,7 +134,7 @@ inline bool hasZeroAngle(int model) {
  */
 inline bool hasScanFrequencyCtrl(int model) {
     bool ret = true;
-    if (model == DriverInterface::YDLIDAR_TIA) {
+    if (model == DriverInterface::YDLIDAR_TEA) {
         ret = false;
     }
     return ret;
@@ -144,7 +146,7 @@ inline bool hasScanFrequencyCtrl(int model) {
  * @return true if supported, otherwise false.
  */
 inline bool isSupportLidar(int model) {
-    if (model == DriverInterface::YDLIDAR_TIA) {
+    if (model == DriverInterface::YDLIDAR_TEA) {
         return false;
     }
     return true;
@@ -157,7 +159,7 @@ inline bool isSupportLidar(int model) {
  */
 inline bool hasIntensity(int model) {
     bool ret = false;
-    if (model == DriverInterface::YDLIDAR_TIA) {
+    if (model == DriverInterface::YDLIDAR_TEA) {
         ret = true;
     }
     return ret;
@@ -170,7 +172,7 @@ inline bool hasIntensity(int model) {
  */
 inline bool isSupportMotorCtrl(int model) {
     bool ret = false;
-    if (model == DriverInterface::YDLIDAR_TIA) {
+    if (model == DriverInterface::YDLIDAR_TEA) {
         ret = true;
     }
     return true;
@@ -184,7 +186,7 @@ inline bool isSupportMotorCtrl(int model) {
  */
 inline bool isSupportScanFrequency(int model, double frequency) {
     bool ret = false;
-    if (model = DriverInterface::YDLIDAR_TIA) {
+    if (model = DriverInterface::YDLIDAR_TEA) {
         if (1 <= frequency && frequency <= 64) {
             ret = true;
         }
@@ -192,83 +194,14 @@ inline bool isSupportScanFrequency(int model, double frequency) {
     return ret;
 }
 
-
-/**
- * @brief Whether it is a TOF type LiDAR
- * @param type  LiDAR type
- * @return true if it is a TOF type, otherwise false.
- */
-inline bool isTOFLidar(int type) {
-    bool ret = false;
-    if (type == TYPE_TOF) {
-        ret = true;
-    }
-    return ret;
-}
-
-/**
- * @brief Whether it is a network hardware interface TOF type LiDAR
- * @param type  LiDAR type
- * @return true if it is a network hardware interface TOF type, otherwise false.
- */
-inline bool isNetTOFLidar(int type) {
-    bool ret = false;
-    if (type == TYPE_TOF_NET) {
-        ret = true;
-    }
-    return ret;
-}
-
-/**
- * @brief Whether it is a Triangle type LiDAR
- * @param type  LiDAR type
- * @return true if it is a Triangle type, otherwise false.
- */
-inline bool isTriangleLidar(int type) {
-    bool ret = false;
-    if (type == TYPE_TRIANGLE) {
-        ret = true;
-    }
-    return ret;
-}
-
-/**
- * @brief Whether it is a GS type LiDAR
- * @param type  LiDAR type
- * @return true if it is a Triangle type, otherwise false.
- */
-inline bool isGSLidar(int type) {
-    return (type == TYPE_GS1 ||
-        type == TYPE_GS);
-}
-
-/**
- * @brief Whether it is a GS1 type LiDAR
- * @param type  LiDAR type
- * @return true if it is a Triangle type, otherwise false.
- */
-inline bool isGS1Lidar(int type) {
-    return (type == TYPE_GS1);
-}
-
 /**
  * @brief Whether it is a GS2 type LiDAR
  * @param type  LiDAR type
  * @return true if it is a Triangle type, otherwise false.
  */
-inline bool isGS2Lidar(int type) {
-    return (type == TYPE_GS);
+inline bool isTEALidar(int type) {
+    return (type == TYPE_TEA);
 }
-
-/**
- * @brief Whether it is a GS2 type LiDAR
- * @param type  LiDAR type
- * @return true if it is a Triangle type, otherwise false.
- */
-inline bool isTIALidar(int type) {
-    return (type == TYPE_TIA);
-}
-
 
 /*!
  * @brief Whether to support Heartbeat.
@@ -277,7 +210,7 @@ inline bool isTIALidar(int type) {
  */
 inline bool isSupportHeartBeat(int model) {
     bool ret = false;
-    if (model == DriverInterface::YDLIDAR_TIA) {
+    if (model == DriverInterface::YDLIDAR_TEA) {
         ret = true;
     }
     return true;
